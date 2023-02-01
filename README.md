@@ -5,6 +5,19 @@ Sequential combinators for templates.
 The library allows us to bind to compiler constructs as identifiers
 using templates and mixin templates.
 
+This code was created to address the issue that we can't bind the
+templates in phobos to, for example, a static foreach block without
+reference to unnecessary nested or exposed code blocks.
+A prime example of this is mixin templates which have the special
+feature of having both an inherited scope for context and a nested
+scope for definitions - highly desirable, but little support in the
+templates libraries.
+
+These issues aren't ususally a problem for most apps, however when
+writing compilers or other apps that generate code, we end up with
+huge amounts of unnecessary code in the generated output and potenitially
+deep nesting.  So yYd attempts to make this output more readable, and
+in the future will also try to create more meaningful error messages.
 
 ```
 identity!T :== alias _ = T
