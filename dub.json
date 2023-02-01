@@ -1,0 +1,10 @@
+{
+	"authors": [
+		"logicfish"
+	],
+	"copyright": "Copyright © 2023, logicfish",
+	"description": "Template combinators",
+	"license": "Apache",
+	"name": "yyd",
+	"targetType": "library"
+}
