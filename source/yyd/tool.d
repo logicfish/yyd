@@ -36,9 +36,16 @@ mixin template __mixinD (string T)
     alias _ = mixin(T);
 }
 
-mixin template _mixin_t (alias T, U ...) 
+mixin template _mixin_t (alias T = _identity, U ...) 
 {
     mixin T!U;
+}
+
+mixin template _mixin_mt (alias T = _identity) 
+{
+    mixin template _(U...) {
+        mixin T!U;
+    }
 }
 
 template mixin_t (alias T = _identity, U ...) 
@@ -53,14 +60,28 @@ if(T.length == 0)
 mixin template mixin_all(T ...)
 if(T.length == 1)
 {
-    mixin (T[0]);
+    alias _front = T[0];
+    mixin _front;
 }
 
 mixin template mixin_all(T ...)
 if(T.length > 1)
 {
-    mixin (T[0]);
+    alias _front = T[0];
+    mixin _front;
     mixin mixin_all!(T[1..$]);
+}
+
+mixin template bind(string label,alias T=identity)
+{
+    mixin("alias " ~ label ~ " = T;");
+}
+
+unittest {
+    enum a = 0;
+    mixin bind!("b",a);
+    static assert(is(typeof(b) == typeof(a)));
+    static assert(b is a);
 }
 
 mixin template assertion (alias T) 
@@ -209,13 +230,136 @@ mixin template _version (
 }
 
 template version_ (
+        string V,
         alias Fnc = identity,
-        alias N = identity,
-        V ...
+        alias N = identity
 ) {
-    version (V) {
-        alias version_ = Fnc;
-    } else {
-        alias version_ = N;       
+    mixin(q{
+        version ( } ~ V ~ q{ ) {
+            alias version_ = Fnc;
+        } else {
+            alias version_ = N;       
+        }
+    });
+}
+
+unittest {
+    alias r = version_!("unittest",true,false);
+    static assert (r);
+}
+
+mixin template tryCatch(alias _try, _catchType, alias _catchBody, alias _finally)
+{
+    alias _f = () {        
+        try {
+            mixin _try!();
+        } catch (_catchType e) {
+            mixin _catchBody!(e);
+        } finally {
+            mixin _finally!();
+        }
+    };
+    alias _ = _f();
+}
+
+mixin template _public(alias T=_indentity) 
+{
+    public {
+        mixin T!();
+    }
+}
+
+mixin template _protected(alias T=_indentity) 
+{
+    protected {
+        mixin T!();
+    }
+}
+
+mixin template _private(alias T=_indentity) 
+{
+    private {
+        mixin T!();
+    }
+}
+
+mixin template _package(alias T=_indentity) 
+{
+    package {
+        mixin T!();
+    }
+}
+
+mixin template _interface(alias T=_indentity) 
+{
+    interface _ {
+        mixin T!();
+    }
+}
+
+mixin template _interface(alias T=_indentity,interfaces ...) 
+{
+    interface _ : interfaces {
+        mixin T!();
+    }
+}
+
+mixin template _struct(alias T=_indentity) 
+{
+    struct _ {
+        mixin T!();
+    }
+}
+
+mixin template _class(alias T=_indentity) 
+{
+    class _ {
+        mixin T!();
+    }
+}
+
+mixin template _class(alias T=_indentity,superClass) 
+{
+    class _ : superClass {
+        mixin T!();
+    }
+}
+
+mixin template _class(alias T=_indentity,superClass,interfaces ...) 
+{
+    class _ : superClass, interfaces {
+        mixin T!();
+    }
+}
+
+mixin template _aliasThis(alias T=identity)
+{
+    alias T this;
+}
+
+mixin template _fnc(alias T=_identity,U ...)
+{
+    alias _ = (U u) {
+        mixin T!();
+    };
+}
+
+mixin template template_(alias T=_identity,U ...)
+{
+    alias _ = T!(U);
+}
+
+
+mixin template _template(alias T=_identity,U ...)
+{
+    template _ (U) {
+        mixin T!();
+    }
+}
+
+mixin template _mtemplate(alias T=_identity,U ...)
+{
+    mixin template _ (U) {
+        mixin T!();
     }
 }

@@ -1,4 +1,4 @@
-# yYd - Mixin template combinators for D
+# y.Yd - Mixin template combinators for D
 
 Sequential combinators for templates.
 

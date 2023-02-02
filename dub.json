@@ -3,8 +3,8 @@
 		"logicfish"
 	],
 	"copyright": "Copyright © 2023, logicfish",
-	"description": "Template combinators",
-	"license": "Apache",
+	"description": "y.Yd - Template and mixin combinators for parsers and yy routing",
+	"license": "Apache 2.0",
 	"name": "yyd",
 	"targetType": "library"
 }

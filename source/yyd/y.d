@@ -175,3 +175,27 @@ unittest {
 
     static assert (result == "First second third");
 }
+
+template toFnc(alias op,V ...) 
+{
+	alias toFnc(T...) = (V v)=>op!T(v);
+}
+
+template toFnc_m(alias op,V ...) 
+{
+	alias toFnc_m(T...) = (V v) {
+		mixin op!(T);
+	};
+}
+
+
+mixin template _toFnc(alias op)
+{
+	alias _ = toFnc!op;
+}
+
+mixin template _toFnc_m(alias op, V ...)
+{
+	alias _ = toFnc_m!(op,V);
+}
+
