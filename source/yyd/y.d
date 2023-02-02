@@ -4,83 +4,114 @@ import std.meta : AliasSeq;
 
 // Functional combinators
 
-mixin template _identity(alias T) {
+mixin template _identity(alias T) 
+{
     alias _ = T;
 }
 
-mixin template _identity(alias T,U...) {
+mixin template _identity(alias T,U...) 
+{
     alias _ = T!U;
 }
 
-template identity(alias T) {
+template identity(alias T) 
+{
     alias identity = T;
 }
 
-template identity(alias T,U...) {
+template identity(alias T,U...) 
+{
    alias identity = T!U;
 }
 
-auto ref identity(T)(inout ref T t) {
+auto ref identity(T)(inout ref T t) 
+{
     return t;
 }
 
-mixin template _evaluate(alias T) {
+mixin template _evaluate(alias T=identity) 
+{
     enum _ = T;
 }
 
-template evaluate(alias T) {
+template evaluate(alias T=identity) 
+{
     enum evaluate = T;
 }
 
-mixin template _apply(alias T,U...) {
-    template _() {
+mixin template _apply(alias T=identity,U...) 
+{
+    template _ () 
+    {
         alias _ = T!U;
     }
 }
 
-mixin template _call(alias T) {
-    auto _(U...)(U u) {
-        return T!u;
+mixin template _call(alias T=identity) 
+{
+    alias _ (U...) = (U u) => T!u;
+}
+
+mixin template _partialm(alias T=_identity,U...) 
+{
+    template _ (V...) 
+    {
+        mixin T!(U,V) _;
     }
 }
 
-mixin template _partialm(alias T,U...) {
-    template _(V...) {
-        mixin T!(AliasSeq!(U,V)) _;
+mixin template _rpartialm(alias T=_identity,U ...) 
+{
+    template _ (V ...) 
+    {
+        mixin T!(V,U) _;
     }
 }
 
-mixin template _rpartialm(alias T,U...) {
-    template _(V...) {
-        mixin T!(AliasSeq!(V,U)) _;
+mixin template _mpartial(alias T=identity, U ...) 
+{
+    mixin template _ (V ...) 
+    {
+        alias _ = T!(U,V);
     }
 }
 
-mixin template _mpartial(alias T,U...) {
-    mixin template _(V...) {
-        alias _ = T!(AliasSeq!(U,V));
+mixin template _partial(alias T=identity, U ...) 
+{
+    template _ (V ...) 
+    {
+        alias _ = T!(U,V);
     }
 }
 
-mixin template _partial(alias T,U...) {
-    template _(V...) {
-        alias _ = T!(AliasSeq!(U,V));
+mixin template _rpartial(alias T=_identity,U...) 
+{
+    template _ (V ...) 
+    {
+        alias _ = T!(V,U);
     }
 }
 
-mixin template _rpartial(alias T,U...) {
-    template _(V...) {
-        alias _ = T!(AliasSeq!(V,U));
-    }
-}
-
-mixin template _partialf(alias T,U...) {
-    auto _(V...)(V v) {
-        return T(U,v);
-    }
+/*
+mixin template _partialf(alias T,U...) 
+{
+    alias _(V...) = (V v) => T(U,v);
 }
 
 mixin template _rpartialf(alias T,U...) {
+    alias _(V ...) = (V v) => T(v.U);
+}
+*/
+
+mixin template _partialf(alias T=identity,U...) 
+{
+   auto _ (V...) (V v) {
+       return T(U,v);
+   }
+}
+
+mixin template _rpartialf(alias T=identity,U...) 
+{
     auto _(V...)(V v) {
         return T(v,U);
     }

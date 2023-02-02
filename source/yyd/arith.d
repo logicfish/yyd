@@ -97,16 +97,25 @@ mixin template _div(alias A, alias B) {
 	alias _ = div!(A,B);
 }
 
+mixin template _concat(alias A, alias B) {
+	alias _ = concat!(A,B);
+}
+
 mixin template _sum(T...) {
 	alias _ = sum!(T);
 }
 
-mixin template _concat(alias A, alias B) {
-	alias _ = concat!(A,B);
+mixin template _concantenate(T...) {
+	alias _ = concantenate!(T);
 }
 
 
 unittest {
     mixin _sum!(1,1,1) t;
     static assert (t._ == 3);
+}
+
+unittest {
+    mixin _concantenate!("a","b","c") t;
+    static assert (t._ == "abc");
 }
