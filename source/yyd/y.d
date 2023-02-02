@@ -199,3 +199,7 @@ mixin template _toFnc_m(alias op, V ...)
 	alias _ = toFnc_m!(op,V);
 }
 
+template __(alias T)
+{
+
+}

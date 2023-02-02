@@ -363,3 +363,13 @@ mixin template _mtemplate(alias T=_identity,U ...)
         mixin T!();
     }
 }
+
+mixin template _exitScope(alias T=_identity,alias V=_identity)
+{
+    alias _ = () {
+        scope(exit) {
+            mixin V!();
+        }
+        mixin T!();
+    };
+}
