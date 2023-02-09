@@ -1,19 +1,19 @@
 module yyd.tool;
 
 public import yyd.y;
-public import yyd.func;
+public import yyd.alg;
 
 // Compilation primitives and mixin combinators
 
-template __msg (alias T) 
+template __msg ( T ... ) 
 {
-    pragma(msg,T);
+    pragma(msg, T);
 }
 
-mixin template _msg (alias T) 
+/* mixin template _msg ( T ... ) 
 {
     pragma(msg,T);
-}
+} */
 
 mixin template _compilesD(string T) 
 {
