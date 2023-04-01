@@ -1,5 +1,7 @@
 module yyd.arith;
 
+private import yyd.y : _y;
+
 // Arithmatic expression evaluator templates
 
 template add(alias A, alias B) 
@@ -21,6 +23,7 @@ template div(alias A, alias B)
 {
 	enum div = A / B;
 }
+
 
 template booleanOr(alias A, alias B) 
 {
@@ -138,13 +141,29 @@ mixin template _concantenate(T...)
 
 unittest {
     mixin _sum!(1,1,1) t;
-    static assert (t._ == 3);
+    static assert (_y!t == 3);
 }
 
 unittest {
     mixin _concantenate!("a","b","c") t;
-    static assert (t._ == "abc");
+    static assert (_y!t == "abc");
 }
+
+alias add(A,B) = (const A a, const B b) => a + b;
+
+alias sub(A,B) = (const A a, const B b) => a - b;
+
+alias mul(A,B) = (A a, B b) => a * b;
+
+alias div(A,B) = (const A a, const B b) => a / b;
+
+//alias add(A,B) = (const A function() a,const B function() b) => add!(a,b);
+
+//alias sub(A,B) = (const A function() a,const B function() b) => sub!(a,b);
+
+//alias mul(A,B) = (const A function() a,const B function() b) => mul!(a,b);
+
+//alias div(A,B) = (const A function() a,const B function() b) => div!(a,b);
 
 template addTo(alias T) 
 {
