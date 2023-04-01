@@ -317,6 +317,14 @@ unittest {
     static assert (result == "First second third");
 }
 
+template bind(alias T=identity) {
+    template bind(U) 
+    if(is(U == struct))
+    {
+        
+    }
+}
+
 /**
  * Embed a template into a lambda.
  */

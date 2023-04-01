@@ -72,14 +72,14 @@ if(T.length > 1)
     mixin mixin_all!(T[1..$]);
 }
 
-mixin template bind(string label,alias T=identity)
+mixin template aliasOf(string label,alias T=identity)
 {
     mixin("alias " ~ label ~ " = T;");
 }
 
 unittest {
     enum a = 0;
-    mixin bind!("b",a);
+    mixin aliasOf!("b",a);
     static assert(is(typeof(b) == typeof(a)));
     static assert(b is a);
 }
