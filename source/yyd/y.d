@@ -312,9 +312,17 @@ unittest {
     //mixin _partialf!(p._,"second ") _p;
     mixin _partialf!(_y!p,"second ") _p;
     //enum result = _p._("third");
-    enum result = _yy!(_p,"third");
+    enum result = _y!(_p)("third");
 
     static assert (result == "First second third");
+}
+
+template bind(alias T=identity) {
+    template bind(U) 
+    if(is(U == struct))
+    {
+        
+    }
 }
 
 /**

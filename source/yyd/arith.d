@@ -27,22 +27,22 @@ template div(alias A, alias B)
 
 template booleanOr(alias A, alias B) 
 {
-	enum booleanOr = A || B;
+	enum booleanOr = A | B;
 }
 
 template booleanAnd(alias A, alias B) 
 {
-	enum booleanAnd = A && B;
+	enum booleanAnd = A & B;
 }
 
 template logicalOr(alias A, alias B) 
 {
-	enum logicalOr = A | B;
+	enum logicalOr = A || B;
 }
 
 template logicalAnd(alias A, alias B) 
 {
-	enum logicalAnd = A & B;
+	enum logicalAnd = A && B;
 }
 
 template concat(alias A, alias B) 
@@ -149,13 +149,31 @@ unittest {
     static assert (_y!t == "abc");
 }
 
-alias add(A,B) = (const A a, const B b) => a + b;
+//alias add(A,B) = (const A a, const B b) => a + b;
+//alias sub(A,B) = (const A a, const B b) => a - b;
+//alias mul(A,B) = (A a, B b) => a * b;
+//alias div(A,B) = (const A a, const B b) => a / b;
 
-alias sub(A,B) = (const A a, const B b) => a - b;
+alias add_(alias A,alias B) = () => A() + B();
+alias sub_(alias A,alias B) = () => A() - B();
+alias mul_(alias A,alias B) = () => A() * B();
+alias div_(alias A,alias B) = () => A() / B();
 
-alias mul(A,B) = (A a, B b) => a * b;
 
-alias div(A,B) = (const A a, const B b) => a / b;
+alias booleanOr_(alias A, alias B) = () => A() | B();
+alias booleanAnd_(alias A, alias B) = () => A() & B();
+alias logicalOr_(alias A, alias B) = () => A() || B();
+alias logicalAnd_(alias A, alias B) = () => A() && B();
+
+alias concat_(alias A, alias B) = () => A() ~ B();
+
+alias equal_(alias A, alias B) = () => A() == B();
+alias notEqual_(alias A, alias B) = () => A() != B();
+
+alias condExpr_(alias Cond, alias _If, alias _Else) = () => Cond() ? _If() : _Else();
+
+
+//>>>>>>> 1dc31e79c7b78aaf2df32d1da084fb03933134db
 
 //alias add(A,B) = (const A function() a,const B function() b) => add!(a,b);
 
