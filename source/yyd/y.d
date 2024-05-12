@@ -1,8 +1,25 @@
 module yyd.y;
 
 private import std.meta : AliasSeq;
+private import std.array : replace;
 
 // Functional combinators
+
+mixin template _void() {}
+
+template identity(alias T) 
+{
+    alias identity = T;
+}
+
+template __identity(alias T) {
+    enum __identity = identity!T;
+}
+
+auto ref identity(T)(inout ref T t) 
+{
+    return identity!t;
+}
 
 /** 
  * Identity
@@ -11,38 +28,67 @@ private import std.meta : AliasSeq;
  */
 mixin template _identity(alias T) 
 {
-    alias _ = T;
+    alias _ = identity!T;
+    
+    private import yyd.mashup : __identifier;
+    enum toString = "identity!" ~ __identifier!T;
 }
 
-mixin template _identity(alias T,U...) 
+/*mixin template _identity(alias T,U...) 
 {
     alias _ = T!U;
+}*/
+
+template __constant(alias T=identity) 
+{
+    enum __constant = T;
 }
 
-template identity(alias T) 
+mixin template _constant(alias T=identity) 
 {
-    alias identity = T;
+    enum _ = __constant!T;
+    private import yyd.mashup : __identifier;
+    enum toString = "__constant!" ~ __identifier!T;
 }
 
-auto ref identity(T)(inout ref T t) 
-{
-    return t;
+/*mixin template _isConstant(alias T=identity) {
+    alias _ = __traits(compiles,"__constant!"~__traits(identifier,T));
+}*/
+
+template isConstant(alias T=identity) {
+        enum isConstant = is(typeof(T)) && __traits(compiles,"enum x = " ~ __identifier!T);
 }
 
-mixin template _evaluate(alias T=identity) 
+
+template __identifier (alias T) 
 {
-    enum _ = T;
+    enum __identifier = __traits(identifier,T);
 }
 
-template evaluate(alias T=identity) 
+mixin template _identifier (alias T) 
 {
-    enum evaluate = T;
+    enum _ = __identifier!T;
+    enum toString = "__identifier!("~__traits(identifier,T)~")";
+}
+
+unittest {
+    import yyd.mashup : __toString;
+    import yyd.mashup : _mixinD;
+    enum x = "X";
+    mixin _identifier!x _;
+    static assert(_._ == "x");
+    static assert(__toString!_ == "__identifier!(x)");
+    enum y = mixin(__toString!_);
+    static assert(y == "x");
+    
+    mixin _mixinD!(__toString!_) z;
+    static assert(z._ == "x");
 }
 
 
 /**
- * Decombinators.
- * These restore the original value where _ has been used as a replacement for eponymosity.
+ * Decombinators (beta reduction).
+ * These restore the intended value where _ has been used as a replacement for eponymosity.
  */
 
 /*mixin template __y()
@@ -80,38 +126,69 @@ template _y(alias T, V ...)
 }
 */
 
-template _y(alias T)
-{
-    static if(is(typeof(T._))) {
-        alias _y = T._;
+// check for eponymous template. The symbol would have a member with the same name as it's identifier.
+template _v(alias T) {
+    static if (__traits(compiles,mixin("T." ~ __identifier!T))) {
+        alias _v = mixin("T." ~ __identifier!T);
     } else {
-        // TODO check for eponymous template. The symbol would have a member with the same name as it's identifier.
-        alias _y = T;
+        alias _v = _y!T;
     }
 }
 
+template _y(alias T)
+{
+    static if (__traits(compiles,T._)) {
+        alias _y = T._;
+    } else {
+        alias _y = T;
+    }
+}
+//alias _ = _y;
+
 /**
- * Decombinator and instatiate T as template with given parameters V.
+ * Decombinator - reduce and instatiate T as template with given parameters V.
  */
 template _yy(alias T,V...) 
 {
-    static if(is(typeof(T._))) {
+    static if(__traits(compiles,T._!(V))) {
         alias _yy = _y!(T._!(V));
     } else {
         alias _yy = _y!(T!(V));
     }
 }
+//alias __ = _yy;
+
 /**
  * Same as _yy but instiate as mixin.
  */
 mixin template _yyy(alias T,V...) 
 {
-    static if(is(typeof(T._))) {
+    import std.array : replace;
+    
+    static if(__traits(compiles,T._!(V))) {
         mixin T._!(V);
+        enum toString = q{
+            mixin T._!(V);
+        }.replace("T",_identifier!T).replace("V",_identifier!V);
     } else {
         mixin T!(V);
+        enum toString = q{
+            mixin T!(V);
+        }.replace("T",_identifier!T).replace("V",_identifier!V);
     }
+    
+    /*enum toString = q{
+        static if(__traits(compiles,T._!(V))) {
+            mixin T._!(V);
+        } else {
+            mixin T!(V);
+        }        
+    }.replace("T",_identifier!T).replace("V",_identifier!V);*/
+    
 }
+//alias ___ = _yyy;
+
+
 
 /*mixin template _yy_(alias T)
 {
@@ -135,10 +212,16 @@ mixin template _apply(alias T=identity,U...)
     {
         alias _ = T!U;
     }
+    enum toString = q{
+        template _ () 
+        {
+            alias _ = } ~ __identifier!T ~ "!" ~ __identifier!U ~ q{;
+        }        
+    };
 }
 
 /**
- * Create an alias template that instantiates template T with a passed in argument.
+ * Create an alias template that instantiates template T inside a lambda with the argument forwarded.
  */
 mixin template _call(alias T=identity) 
 {
@@ -257,7 +340,6 @@ unittest {
     }
 
     mixin _partial!(t1,"First ","second ") p;
-    //enum result = _y!(p,"third");
     enum result = p._!"third";
 
     static assert (result == "First second third");
@@ -269,7 +351,6 @@ unittest {
     }
 
     mixin _rpartial!(t1,"First ","second") p;
-    //enum result = _y!(p,"third ");
     enum result = _yy!(p,"third ");
 
     static assert (result == "third First second");
@@ -282,7 +363,7 @@ unittest {
 
     mixin _partial!(t1,"First ") p;
     //mixin _partial!(_y!(p,"second ")) q;
-    mixin _partial!(p._,"second ") q;
+    mixin _partial!(_v!p,"second ") q;
     //enum result = q._!("third");
     enum result = _yy!(q,"third");
 
@@ -295,9 +376,8 @@ unittest {
     }
 
     mixin _partial!(t1,"First ") p;
-    mixin _partial!(p._,"second ") _p;
-    mixin _apply!(_p._,"third") _q;
-    //enum result = _q._!();
+    mixin _partial!(_y!p,"second ") _p;
+    mixin _apply!(_y!_p,"third") _q;
     enum result = _yy!(_q);
 
     static assert (result == "First second third");
@@ -317,13 +397,13 @@ unittest {
     static assert (result == "First second third");
 }
 
-template bind(alias T=identity) {
+/*template bind(alias T=identity) {
     template bind(U) 
     if(is(U == struct))
     {
         
     }
-}
+}*/
 
 /**
  * Embed a template into a lambda.
@@ -344,9 +424,9 @@ mixin template y__(alias op)
 	};
 }
 
-template y_ (alias T) {
-    alias y_() = ()=>T!v;
-}
+/*template y_ (alias T) {
+    alias y_() = ()=>T!();
+}*/
 
 mixin template _toFnc(alias op)
 {

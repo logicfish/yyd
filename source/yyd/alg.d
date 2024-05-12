@@ -81,6 +81,14 @@ unittest {
 }
 
 unittest {
+    template doubleString(alias T) {
+        enum _ = T ~ T;
+    }
+    mixin _mapApply!(doubleString,"Test","Test2") m;
+    static assert(_y!m == AliasSeq!("TestTest","Test2Test2"));
+}
+
+unittest {
     import yyd.arith;
 
     mixin _partialm!(_add,1) _a;

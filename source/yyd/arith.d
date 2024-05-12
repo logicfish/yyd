@@ -4,6 +4,11 @@ private import yyd.y : _y;
 
 // Arithmatic expression evaluator templates
 
+template num(alias A) {
+	import std.conv : to;
+	enum num = A.to!double;
+}
+
 template add(alias A, alias B) 
 {
 	enum add = A + B;
@@ -154,10 +159,16 @@ unittest {
 //alias mul(A,B) = (A a, B b) => a * b;
 //alias div(A,B) = (const A a, const B b) => a / b;
 
+alias num_(alias A) = ()=>num!A;
+
 alias add_(alias A,alias B) = () => A() + B();
 alias sub_(alias A,alias B) = () => A() - B();
 alias mul_(alias A,alias B) = () => A() * B();
 alias div_(alias A,alias B) = () => A() / B();
+/*alias add_(alias A,alias B) = () => add!(A(),B());
+alias sub_(alias A,alias B) = () => sub!(A(),B());
+alias mul_(alias A,alias B) = () => mul!(A(),B());
+alias div_(alias A,alias B) = () => div!(A(),B());*/
 
 
 alias booleanOr_(alias A, alias B) = () => A() | B();
