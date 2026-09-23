@@ -7,5 +7,6 @@
 	"license": "Apache 2.0",
 	"name": "yyd",
 	"targetType": "library",
-	"dflags": [ "-lowmem" ]
+	"dflags-dmd": [ "-lowmem" ],
+	"dflags-ldc2": [ "--lowmem" ]
 }
